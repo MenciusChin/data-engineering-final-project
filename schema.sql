@@ -1,10 +1,21 @@
 /* The script for designing the tables for project */
 
+/* This table stores al information of a hospital */
 CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
     facility_type TEXT NOT NULL,
-    emergency_service BOOLEAN NOT NULL
+    emergency_service BOOLEAN NOT NULL,
+    -- We include all geographic information in the table avoid excessive JOINs
+    address TEXT NOT NULL, 
+    city TEXT NOT NULL,
+    state_abbrev CHAR(2) NOT NULL,
+    state_name TEXT NOT NULL,
+    -- Assume zipcode are either 00000 or 00000-0000
+    zipcode VARCHAR(10) NOT NULL,
+    -- fipscode are 00000
+    fipscode CHAR(5) NOT NULL,
+    county TEXT NOT NULL
 )
 
 /* We assume there will be many quality ratings for one hospital, 
@@ -18,6 +29,8 @@ CREATE TABLE quality_ratings (
     facility_id TEXT REFERENCES facility_information(facility_id)
 )
 
+/* We assume there will be many reports for one hospital, 
+   And we would like to keeo track of the reports. */
 CREATE TABLE facility_reports (
     report_id SERIAL PRIMARY KEY
     report_date DATE CHECK (report_date <= NOW()),
