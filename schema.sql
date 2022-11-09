@@ -7,8 +7,12 @@ Three entities were designed in the schema:
     - facility_reports REFERENCES facility_information(facility_id)
 It was designed based on the assumption that:
     - Unique facility/hosipital
-    - Hospital one-to-many ratings (Yearly)
-    - Hospital one-to-may reports (Weekly)
+    - Hospital one-to-many ratings (Yearly), unique ratings
+    - Hospital one-to-may reports (Weekly), unique reports
+It was not redundant since:
+    1. No overlap columns in three entities except primary and foreign keys
+    2. The geolocation information is in the facility_information so that
+       we don't need excessive JOINS to get the information
 */
 
 /* This table stores all information of a hospital */
@@ -49,27 +53,16 @@ CREATE TABLE facility_reports (
     hospital_pk TEXT REFERENCES facility_information(facility_id),
     hospital_name TEXT NOT NULL,
     -- The total number of hospital beds available each week, broken down into adult and pediatric (children) beds
-    total_adult_hospital_beds NUMERIC NOT NULL
-        CHECK (total_adult_hospital_beds >= 0),
-    total_pediatric_hospital_beds NUMERIC NOT NULL
-        CHECK (total_pediatric_hospital_beds >= 0),
+    total_adult_hospital_beds NUMERIC NOT NULL,
+    total_pediatric_hospital_beds NUMERIC NOT NULL,
     -- The number of hospital beds that are in use each week
-    total_adult_hospital_beds_occupied NUMERIC NOT NULL
-        CHECK (total_adult_hospital_beds_occupied >= 0),
-    total_pediatric_hospital_beds_occupied NUMERIC NOT NULL
-        CHECK (total_pediatric_hospital_beds_occupied >= 0),
+    total_adult_hospital_beds_occupied NUMERIC NOT NULL,
+    total_pediatric_hospital_beds_occupied NUMERIC NOT NULL,
     -- The number of ICU (intensive care unit) beds available and the number in use
-    total_icu_beds NUMERIC NOT NULL CHECK (total_icu_beds >= 0),
-        CHECK (total_icu_beds <= total_adult_hospital_beds + total_pediatric_hospital_beds),
-    total_icu_beds_occupied NUMERIC NOT NULL CHECK (total_icu_beds_occupied >= 0),
-        CHECK (total_icu_beds_occupied <= total_adult_hospital_beds_occupied +
-               total_pediatric_hospital_beds_occupied)
+    total_icu_beds NUMERIC NOT NULL,
+    total_icu_beds_occupied NUMERIC NOT NULL,
     -- The number of patients hospitalized who have confirmed COVID
-    inpatient_beds_occupied_covid NUMERIC NOT NULL CHECK (inpatient_beds_occupied_covid >= 0),
-        CHECK (inpatient_beds_occupied_covid <= total_adult_hospital_beds_occupied +
-               total_pediatric_hospital_beds_occupied)
+    inpatient_beds_occupied_covid NUMERIC NOT NULL,
     -- The number of adult ICU patients who have confirmed COVID
     adult_icu_patients_confirmed_covid NUMERIC NOT NULL 
-        CHECK (adult_icu_patients_confirmed_covid <= inpatient_beds_occupied_covid),
-        CHECK (adult_icu_patients_confirmed_covid >= 0),
 )
