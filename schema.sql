@@ -32,7 +32,7 @@ CREATE TABLE facility_information (
     -- fipscode are 00000
     fipscode CHAR(5) NOT NULL,
     county TEXT NOT NULL
-)
+);
 
 /* We assume there will be many quality ratings for one hospital, 
    And we would like to keeo track of the ratings. */
@@ -43,12 +43,12 @@ CREATE TABLE quality_ratings (
     rating TEXT NOT NULL,
     -- So we references to the facility_information table here
     facility_id TEXT REFERENCES facility_information(facility_id)
-)
+);
 
 /* We assume there will be many reports for one hospital, 
    And we would like to keeo track of the reports. */
 CREATE TABLE facility_reports (
-    report_id SERIAL PRIMARY KEY
+    report_id SERIAL PRIMARY KEY,
     report_date DATE CHECK (report_date <= NOW()),
     hospital_pk TEXT REFERENCES facility_information(facility_id),
     hospital_name TEXT NOT NULL,
@@ -65,4 +65,4 @@ CREATE TABLE facility_reports (
     inpatient_beds_occupied_covid NUMERIC NOT NULL,
     -- The number of adult ICU patients who have confirmed COVID
     adult_icu_patients_confirmed_covid NUMERIC NOT NULL 
-)
+);
