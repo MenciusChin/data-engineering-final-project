@@ -1,12 +1,24 @@
 /* The script for designing the tables for project */
 
-/* This table stores al information of a hospital */
+/*
+Three entities were designed in the schema:
+    - facility_information 
+    - quality_ratings REFERENCES facility_information(facility_id)
+    - facility_reports REFERENCES facility_information(facility_id)
+It was designed based on the assumption that:
+    - Unique facility/hosipital
+    - Hospital one-to-many ratings (Yearly)
+    - Hospital one-to-may reports (Weekly)
+*/
+
+/* This table stores all information of a hospital */
 CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
     facility_type TEXT NOT NULL,
     emergency_service BOOLEAN NOT NULL,
     -- We include all geographic information in the table avoid excessive JOINs
+    geocoded_hospital_address TEXT NOT NULL,
     address TEXT NOT NULL, 
     city TEXT NOT NULL,
     state_abbrev CHAR(2) NOT NULL,
