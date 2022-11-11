@@ -1,2 +1,5 @@
 # Ignore personal credentials file
 credentials.py
+
+# Ignore our data files
+*.csv
