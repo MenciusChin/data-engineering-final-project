@@ -2,4 +2,4 @@
 credentials.py
 
 # Ignore our data files
-*.csv
+data/
