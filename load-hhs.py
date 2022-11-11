@@ -10,3 +10,7 @@ password = DB_PASSWORD
 
 # Load data from terminal input
 data = pd.read_csv('data/hhs/' + sys.agrv[1])
+
+# Columns we want to extract
+
+

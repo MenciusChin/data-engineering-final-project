@@ -19,8 +19,8 @@ It was not redundant since:
 CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
-    facility_type TEXT NOT NULL,
-    emergency_service BOOLEAN NOT NULL,
+    facility_type TEXT,
+    emergency_service BOOLEAN,
     -- We include all geographic information in the table avoid excessive JOINs
     geocoded_hospital_address TEXT NOT NULL,
     address TEXT NOT NULL, 
@@ -38,7 +38,7 @@ CREATE TABLE facility_information (
    And we would like to keeo track of the ratings. */
 CREATE TABLE quality_ratings (
     rating_id SERIAL PRIMARY KEY,
-    rating_year DATE CHECK (rating_year <= NOW()),
+    rating_date DATE CHECK (rating_year <= NOW()),
     -- We stored the different ratings in this column
     rating TEXT NOT NULL,
     -- So we references to the facility_information table here
