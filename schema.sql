@@ -19,19 +19,19 @@ It was not redundant since:
 CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
-    facility_type TEXT NOT NULL,
-    emergency_service BOOLEAN NOT NULL,
+    facility_type TEXT,
+    emergency_service BOOLEAN,
     -- We include all geographic information in the table avoid excessive JOINs
-    geocoded_hospital_address TEXT NOT NULL,
-    address TEXT NOT NULL, 
-    city TEXT NOT NULL,
-    state_abbrev CHAR(2) NOT NULL,
-    state_name TEXT NOT NULL,
+    geocoded_hospital_address TEXT,
+    address TEXT, 
+    city TEXT,
+    state_abbrev CHAR(2),
+    state_name TEXT,
     -- Assume zipcode are either 00000 or 00000-0000
-    zipcode VARCHAR(10) NOT NULL,
+    zipcode VARCHAR(10),
     -- fipscode are 00000
-    fipscode CHAR(5) NOT NULL,
-    county TEXT NOT NULL
+    fipscode CHAR(5),
+    county TEXT
 );
 
 /* We assume there will be many quality ratings for one hospital, 

@@ -53,7 +53,8 @@ with conn.transaction():
                                 "%(facility_id)s, %(facility_name)s, "
                                 "%(facility_type)s, %(emergency_service)s, "
                                 "%(address)s, %(city)s, %(state_abbrev)s, "
-                                "%(zipcode)s, %(county)s",
+                                "%(zipcode)s, %(county)s"
+                                ")",
                                 {
                                     "facility_id": facility_id,
                                     "facility_name": facility_name,
@@ -73,7 +74,8 @@ with conn.transaction():
                                 "emergency_service = %(emergency_service)s, "
                                 "state_abbrev = %(state_abbrev)s, "
                                 "county = %(county)s "
-                                "WHERE facility_id = %(facility_id)s",
+                                "WHERE facility_id = %(facility_id)s"
+                                ")",
                                 {
                                     "facility_type": facility_type,
                                     "emergency_service": emergency_service,
