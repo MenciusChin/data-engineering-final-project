@@ -44,7 +44,7 @@ with conn.transaction():
          address, city, state_abbrev, zipcode, county, rating) = row[target]
 
         # Change rating to None if Not Avaliable
-        if (rating == "Not Avaliable"):
+        if (rating == "Not Available"):
             rating = None
 
         # If the hospital is new
