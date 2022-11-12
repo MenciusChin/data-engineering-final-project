@@ -20,7 +20,7 @@ CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
     facility_type TEXT,
-    emergency_service BOOLEAN,
+    emergency_service TEXT,
     -- We include all geographic information in the table avoid excessive JOINs
     geocoded_hospital_address TEXT,
     address TEXT, 

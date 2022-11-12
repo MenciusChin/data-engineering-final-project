@@ -18,14 +18,15 @@ cur = conn.cursor()
 data = pd.read_csv('data/quality/' + sys.argv[2])
 
 # Get existing hospitals/facilities id
-facility_ids = pd.read_sql_query("SELECT facility_id "
-                                 "FROM facility_information", conn)
+# Seem that pd.read_sql doesn't work
+cur.execute("SELECT facility_id FROM facility_information")
+facility_ids = pd.DataFrame(cur.fetchall())
 
 # Target variables
-target = ['Facility ID', 'Facility Name', 'Hospital Type',
-          'Emergency Services', 'Address', 'City', 'State',
-          'ZIP Code', 'County Name', 'Hospital overall rating']
-existing_ids = set(facility_ids['facility_id'])     # Hashed so serach faster
+target = ["Facility ID", "Facility Name", "Hospital Type",
+          "Emergency Services", "Address", "City", "State",
+          "ZIP Code", "County Name", "Hospital overall rating"]
+existing_ids = set(facility_ids)     # Hashed so serach faster
 
 # Start transaction
 with conn.transaction():
@@ -54,7 +55,7 @@ with conn.transaction():
                                 "%(facility_type)s, %(emergency_service)s, "
                                 "%(address)s, %(city)s, %(state_abbrev)s, "
                                 "%(zipcode)s, %(county)s"
-                                ")",
+                                ");",
                                 {
                                     "facility_id": facility_id,
                                     "facility_name": facility_name,
@@ -75,7 +76,7 @@ with conn.transaction():
                                 "state_abbrev = %(state_abbrev)s, "
                                 "county = %(county)s "
                                 "WHERE facility_id = %(facility_id)s"
-                                ")",
+                                ");",
                                 {
                                     "facility_type": facility_type,
                                     "emergency_service": emergency_service,
@@ -86,9 +87,11 @@ with conn.transaction():
 
         # If exception caught (any), rollback
         except Exception as e:
-            print("Insertion failed:", e)
+            print("Insertion into facility_information failed at row " +
+                  str(index) + ":", e)
+            data.iloc[index].to_csv("error_row.csv")
         else:
-            num_info_inserted += 0
+            num_info_inserted += 1
 
         # Then INSERT INTO quality_ratings
         try:
@@ -102,7 +105,7 @@ with conn.transaction():
                                 ") VALUES ("
                                 "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
                                 "NULL, %(facility_id)s"
-                                ")",
+                                ");",
                                 {"rating_date": sys.argv[1],
                                  "facility_id": facility_id})
                 else:
@@ -112,17 +115,19 @@ with conn.transaction():
                                 ") VALUES ("
                                 "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
                                 "%(rating)s, %(facility_id)s"
-                                ")",
+                                ");",
                                 {"rating_date": sys.argv[1], "rating": rating,
                                  "facility_id": facility_id})
         except Exception as e:
-            print("Insertion failed:", e)
+            print("Insertion into quality_ratings failed at row " +
+                  str(index) + ":", e)
+            data.iloc[index].to_csv("error_row.csv")
         else:
             # No exception happened, so we continue
             num_quality_inserted += 1
 
 # now we commit the entire transaction
 conn.commit()
-print('Number of rows inserted into facility_information:', num_info_inserted)
-print('Number of rows updated in facility_information:', num_info_updated)
-print('Number of rows inserted into quality_ratings:', num_quality_inserted)
+print("Number of rows inserted into facility_information:", num_info_inserted)
+print("Number of rows updated in facility_information:", num_info_updated)
+print("Number of rows inserted into quality_ratings:", num_quality_inserted)

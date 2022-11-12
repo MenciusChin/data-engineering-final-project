@@ -1,0 +1,39 @@
+,35
+Facility ID,010069
+Facility Name,MEDICAL CENTER BARBOUR
+Address,820 W WASHINGTON ST
+City,EUFAULA
+State,AL
+ZIP Code,36027
+County Name,Barbour
+Phone Number,(334) 688-7271
+Hospital Type,Acute Care Hospitals
+Hospital Ownership,Government - Hospital District or Authority
+Emergency Services,Yes
+Meets criteria for promoting interoperability of EHRs,
+Hospital overall rating,2
+Hospital overall rating footnote,
+MORT Group Measure Count,7
+Count of Facility MORT Measures,3
+Count of MORT Measures Better,0
+Count of MORT Measures No Different,3
+Count of MORT Measures Worse,0
+MORT Group Footnote,
+Safety Group Measure Count,8
+Count of Facility Safety Measures,2
+Count of Safety Measures Better,0
+Count of Safety Measures No Different,2
+Count of Safety Measures Worse,0
+Safety Group Footnote,
+READM Group Measure Count,11
+Count of Facility READM Measures,5
+Count of READM Measures Better,0
+Count of READM Measures No Different,5
+Count of READM Measures Worse,0
+READM Group Footnote,
+Pt Exp Group Measure Count,8
+Count of Facility Pt Exp Measures,8
+Pt Exp Group Footnote,
+TE Group Measure Count,14
+Count of Facility TE Measures,7
+TE Group Footnote,
