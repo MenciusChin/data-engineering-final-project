@@ -1,10 +1,11 @@
 """Module for loading reports data into DB"""
 
 import sys
-import psycopg
-import pandas as pd
-from credentials import DB_USER, DB_PASSWORD
 
+import pandas as pd
+import psycopg
+
+from credentials import DB_PASSWORD, DB_USER
 
 # Connect to DB
 conn = psycopg.connect(
@@ -16,53 +17,110 @@ cur = conn.cursor()
 # Load data from terminal input
 data = pd.read_csv('data/quality/' + sys.argv[2])
 
-# Extract columns we need 
+# Get existing hospitals/facilities id
+facility_ids = pd.read_sql_query("SELECT facility_id "
+                                 "FROM facility_information", conn)
 
-"""
-INSERT INTO facility_information (
-    facility_id, facility_name, facility_type, emergency_service,
-    address, city, state_name, zip-code, county
-) VALUES (
-)
-"""
+# Target variables
+target = ['Facility ID', 'Facility Name', 'Hospital Type',
+          'Emergency Services', 'Address', 'City', 'State',
+          'ZIP Code', 'County Name', 'Hospital overall rating']
+existing_ids = set(facility_ids['facility_id'])     # Hashed so serach faster
 
-num_rows_inserted = 0
-num_rows_updated = 0
-
-# Make a new transaction for inserting quality reports
-"""
-INSERT INTO quality_ratings (
-    rating_date, rating, facility_id
-) VALUES (
-    %(rating_data)s, %(rating)s, %(facility_id)s
-)
-"""
+# Start transaction
 with conn.transaction():
-    for row in data:
-        try:
-            # make a new SAVEPOINT
-            with conn.transaction():
-                # perhaps a bunch of reformatting and data manipulation goes here
+    # Create counting variables
+    num_info_inserted = 0
+    num_info_updated = 0
+    num_quality_inserted = 0
 
-                # now insert the data
-                cur.execute("INSERT INTO countries (country_code, country_name) "
-                            "VALUES (%(cc)s, %(cid)s)",
-                            {"cc": "fr", "cid": "France"})
-        except psycopg.errors.UniqueViolation as uv:
-            # if an exception/error happens in this block, Postgres goes back to
-            # the last savepoint upon exiting the `with` block
-            print("insert failed thus update:", uv)
-            # add additional logging, error handling here
-            cur.execute("UPDATE countries "
-                        "SET country_name = %(cid)s "
-                        "WHERE country_code = %(cc)s",
-                        {"cc": "fr", "cid": "France"})
-            num_rows_updated += 1
+    for index, row in data.iterrows():
+        # First extract our target variables
+        (facility_id, facility_name, facility_type, emergency_service,
+         address, city, state_abbrev, zipcode, county, rating) = row[target]
+
+        # First INSERT INTO facility_information
+        try:
+            # Make a new SAVEPOINT
+            with conn.transaction():
+                if (facility_id not in facility_ids):
+                    # Only insert when not in table
+                    cur.execute("INSERT INTO facility_information ("
+                                "facility_id, facility_name, facility_type, "
+                                "emergency_service, address, city, "
+                                "state_abbrev, zipcode, county"
+                                ") VALUES ("
+                                "%(facility_id)s, %(facility_name)s, "
+                                "%(facility_type)s, %(emergency_service)s, "
+                                "%(address)s, %(city)s, %(state_abbrev)s, "
+                                "%(zipcode)s, %(county)s",
+                                {
+                                    "facility_id": facility_id,
+                                    "facility_name": facility_name,
+                                    "facility_type": facility_type,
+                                    "emergency_service": emergency_service,
+                                    "address": address,
+                                    "city": city,
+                                    "state_abbrev": state_abbrev,
+                                    "zipcode": zipcode,
+                                    "county": county
+                                })
+
+                else:
+                    # If already exists, update what it doesn't have
+                    cur.execute("UPDATE facility_information "
+                                "SET facility_type = %(facility_type)s, "
+                                "emergency_service = %(emergency_service)s, "
+                                "state_abbrev = %(state_abbrev)s, "
+                                "county = %(county)s "
+                                "WHERE facility_id = %(facility_id)s",
+                                {
+                                    "facility_type": facility_type,
+                                    "emergency_service": emergency_service,
+                                    "state_abbrev": state_abbrev,
+                                    "county": county
+                                })
+                    num_info_updated += 1       # Update count
+
+        # If exception caught (any), rollback
+        except Exception as e:
+            print("Insertion failed:", e)
         else:
-            # no exception happened, so we continue without reverting the savepoint
-            num_rows_inserted += 1
+            num_info_inserted += 0
+
+        # Then INSERT INTO quality_ratings
+        try:
+            # Make a new SAVEPOINT
+            with conn.transaction():
+                # If rating is 'Not Avaliable'
+                if (rating == 'Not Avaliable'):
+                    # Insert NULL for rating
+                    cur.execute("INSERT INTO quality_ratings ("
+                                "rating_date, rating, facility_id"
+                                ") VALUES ("
+                                "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
+                                "NULL, %(facility_id)s"
+                                ")",
+                                {"rating_date": sys.argv[1],
+                                 "facility_id": facility_id})
+                else:
+                    # Insert the data based on the row value
+                    cur.execute("INSERT INTO quality_ratings ("
+                                "rating_date, rating, facility_id"
+                                ") VALUES ("
+                                "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
+                                "%(rating)s, %(facility_id)s"
+                                ")",
+                                {"rating_date": sys.argv[1], "rating": rating,
+                                 "facility_id": facility_id})
+        except Exception as e:
+            print("Insertion failed:", e)
+        else:
+            # No exception happened, so we continue
+            num_quality_inserted += 1
 
 # now we commit the entire transaction
-print(num_rows_inserted)
-print(num_rows_updated)
 conn.commit()
+print('Number of rows inserted into facility_information:', num_info_inserted)
+print('Number of rows updated in facility_information:', num_info_updated)
+print('Number of rows inserted into quality_ratings:', num_quality_inserted)
