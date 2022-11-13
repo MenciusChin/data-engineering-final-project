@@ -25,8 +25,7 @@ CREATE TABLE facility_information (
     geocoded_hospital_address TEXT,
     address TEXT, 
     city TEXT,
-    state_abbrev CHAR(2),
-    state_name TEXT,
+    state CHAR(2),
     -- Assume zipcode are either 00000 or 00000-0000
     zipcode VARCHAR(10),
     -- fipscode are 00000

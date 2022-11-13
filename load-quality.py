@@ -41,7 +41,7 @@ with conn.transaction():
     for index, row in data.iterrows():
         # First extract our target variables
         (facility_id, facility_name, facility_type, emergency_service,
-         address, city, state_abbrev, zipcode, county, rating) = row[target]
+         address, city, state, zipcode, county, rating) = row[target]
 
         # Change rating to None if Not Avaliable
         if (rating == "Not Available"):
@@ -57,11 +57,11 @@ with conn.transaction():
                     cur.execute("INSERT INTO facility_information ("
                                 "facility_id, facility_name, facility_type, "
                                 "emergency_service, address, city, "
-                                "state_abbrev, zipcode, county"
+                                "state, zipcode, county"
                                 ") VALUES ("
                                 "%(facility_id)s, %(facility_name)s, "
                                 "%(facility_type)s, %(emergency_service)s, "
-                                "%(address)s, %(city)s, %(state_abbrev)s, "
+                                "%(address)s, %(city)s, %(state)s, "
                                 "%(zipcode)s, %(county)s"
                                 ");",
                                 {
@@ -71,7 +71,7 @@ with conn.transaction():
                                     "emergency_service": emergency_service,
                                     "address": address,
                                     "city": city,
-                                    "state_abbrev": state_abbrev,
+                                    "state": state,
                                     "zipcode": zipcode,
                                     "county": county
                                 })
@@ -92,13 +92,13 @@ with conn.transaction():
                     cur.execute("UPDATE facility_information "
                                 "SET facility_type = %(facility_type)s, "
                                 "emergency_service = %(emergency_service)s, "
-                                "state_abbrev = %(state_abbrev)s, "
+                                "state = %(state)s, "
                                 "county = %(county)s "
                                 "WHERE facility_id = %(facility_id)s;",
                                 {
                                     "facility_type": facility_type,
                                     "emergency_service": emergency_service,
-                                    "state_abbrev": state_abbrev,
+                                    "state": state,
                                     "county": county,
                                     "facility_id": facility_id
                                 })
