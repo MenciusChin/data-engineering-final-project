@@ -92,20 +92,18 @@ with conn.transaction():
                     cur.execute("UPDATE facility_information "
                                 "SET facility_type = %(facility_type)s, "
                                 "emergency_service = %(emergency_service)s, "
-                                "state = %(state)s, "
                                 "county = %(county)s "
                                 "WHERE facility_id = %(facility_id)s;",
                                 {
                                     "facility_type": facility_type,
                                     "emergency_service": emergency_service,
-                                    "state": state,
                                     "county": county,
                                     "facility_id": facility_id
                                 })
 
             # If exception caught (any), rollback
             except Exception as e:
-                print("Insertion into facility_information failed at row " +
+                print("Updating facility_information failed at row " +
                       str(index) + ":", e)
                 data.iloc[index].to_csv("error_row.csv")
 

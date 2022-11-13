@@ -50,8 +50,8 @@ CREATE TABLE facility_reports (
     report_id SERIAL PRIMARY KEY,
     report_date DATE CHECK (report_date <= NOW()),
     hospital_pk TEXT REFERENCES facility_information(facility_id),
-    hospital_name TEXT NOT NULL,
-    -- The total number of hospital beds available each week, broken down into adult and pediatric (children) beds
+    -- The total number of hospital beds available each week, 
+    -- broken down into adult and pediatric (children) beds
     total_adult_hospital_beds NUMERIC CHECK (total_adult_hospital_beds >= 0),
     total_pediatric_hospital_beds NUMERIC CHECK (total_pediatric_hospital_beds >= 0),
     -- The number of hospital beds that are in use each week
