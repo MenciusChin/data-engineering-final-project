@@ -52,16 +52,20 @@ CREATE TABLE facility_reports (
     hospital_pk TEXT REFERENCES facility_information(facility_id),
     hospital_name TEXT NOT NULL,
     -- The total number of hospital beds available each week, broken down into adult and pediatric (children) beds
-    total_adult_hospital_beds NUMERIC NOT NULL,
-    total_pediatric_hospital_beds NUMERIC NOT NULL,
+    total_adult_hospital_beds NUMERIC CHECK (total_adult_hospital_beds >= 0),
+    total_pediatric_hospital_beds NUMERIC CHECK (total_pediatric_hospital_beds >= 0),
     -- The number of hospital beds that are in use each week
-    total_adult_hospital_beds_occupied NUMERIC NOT NULL,
-    total_pediatric_hospital_beds_occupied NUMERIC NOT NULL,
+    total_adult_hospital_beds_occupied NUMERIC 
+        CHECK (total_adult_hospital_beds_occupied >= 0),
+    total_pediatric_hospital_beds_occupied NUMERIC
+        CHECK (total_pediatric_hospital_beds_occupied >= 0),
     -- The number of ICU (intensive care unit) beds available and the number in use
-    total_icu_beds NUMERIC NOT NULL,
-    total_icu_beds_occupied NUMERIC NOT NULL,
+    total_icu_beds NUMERIC CHECK (total_icu_beds >= 0),
+    total_icu_beds_occupied NUMERIC CHECK (total_icu_beds_occupied >= 0),
     -- The number of patients hospitalized who have confirmed COVID
-    inpatient_beds_occupied_covid NUMERIC NOT NULL,
+    inpatient_beds_occupied_covid NUMERIC
+        CHECK (inpatient_beds_occupied_covid >= 0),
     -- The number of adult ICU patients who have confirmed COVID
-    adult_icu_patients_confirmed_covid NUMERIC NOT NULL 
+    adult_icu_patients_confirmed_covid NUMERIC 
+        CHECK (adult_icu_patients_confirmed_covid >= 0)
 );

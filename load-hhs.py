@@ -28,14 +28,13 @@ conn.commit()        # Commit here for the SELECT clause
 target = ["hospital_pk", "collection_week", "state",
           "hospital_name", "address", "city", "zip",
           "fips_code", "geocoded_hospital_address",
-          "Hospital overall rating",
           "all_adult_hospital_beds_7_day_avg",
           "all_pediatric_inpatient_beds_7_day_avg",
           "all_adult_hospital_inpatient_bed_occupied_7_day_avg",
           "all_pediatric_inpatient_bed_occupied_7_day_avg",
           "total_icu_beds_7_day_avg", "icu_beds_used_7_day_avg",
           "inpatient_beds_used_covid_7_day_avg",
-          "staffed_adult_icu_patients_confirmed_covid_7_day_avg"]
+          "staffed_icu_adults_patients_confirmed_covid_7_day_avg"]
 
 # Hashed so serach faster
 existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
