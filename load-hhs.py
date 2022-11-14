@@ -73,7 +73,7 @@ with conn.transaction():
             total_pediatric_hospital_beds_occupied = None
         if check_numeric_na(total_icu_beds):
             total_icu_beds = None
-        if check_numeric_na(total_icu_beds_occupied < 0):
+        if check_numeric_na(total_icu_beds_occupied):
             total_icu_beds_occupied = None
         if check_numeric_na(inpatient_beds_occupied_covid):
             inpatient_beds_occupied_covid = None
@@ -81,11 +81,10 @@ with conn.transaction():
             adult_icu_patients_confirmed_covid = None
 
         # For geocoded information
-        if (geocoded_hospital_address is None):
+        if (pd.isna(geocoded_hospital_address)):
             lat = None
             lon = None
         else:
-            print(geocoded_hospital_address.type())
             lat = float(geocoded_hospital_address.split(" ")[1][1:])
             lon = float(geocoded_hospital_address.split(" ")[2][:-1])
 
