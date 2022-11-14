@@ -27,6 +27,7 @@ conn.commit()        # Commit here for the SELECT clause
 target = ["Facility ID", "Facility Name", "Hospital Type",
           "Emergency Services", "Address", "City", "State",
           "ZIP Code", "County Name", "Hospital overall rating"]
+errors = pd.DataFrame(columns=target)
 
 # Hashed so serach faster
 existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
@@ -79,7 +80,7 @@ with conn.transaction():
             except Exception as e:
                 print("Insertion into facility_information failed at row " +
                       str(index) + ":", e)
-                data.iloc[index].to_csv("error_row.csv")
+                errors.append(row[target])
             else:
                 num_info_inserted += 1
 
@@ -105,7 +106,7 @@ with conn.transaction():
             except Exception as e:
                 print("Updating facility_information failed at row " +
                       str(index) + ":", e)
-                data.iloc[index].to_csv("error_row.csv")
+                errors.append(row[target])
 
             else:
                 num_info_updated += 1
@@ -125,13 +126,14 @@ with conn.transaction():
         except Exception as e:
             print("Insertion into quality_ratings failed at row " +
                   str(index) + ":", e)
-            data.iloc[index].to_csv("error_row.csv")
+            errors.append(row[target])
         else:
             # No exception happened, so we continue
             num_quality_inserted += 1
 
 # now we commit the entire transaction
 conn.commit()
+errors.to_csv("error_rows.csv")
 print("Number of rows inserted into facility_information:", num_info_inserted)
 print("Number of rows updated in facility_information:", num_info_updated)
 print("Number of rows inserted into quality_ratings:", num_quality_inserted)

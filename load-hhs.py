@@ -7,6 +7,12 @@ import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
 
+
+# Helper function for checking numeric NA values
+def check_numeric_na(var):
+    return True if (var is None or var < 0) else False
+
+
 # Connect to DB
 conn = psycopg.connect(
     host='sculptor.stat.cmu.edu', dbname=DB_USER,
@@ -34,6 +40,7 @@ target = ["hospital_pk", "collection_week", "state",
           "total_icu_beds_7_day_avg", "icu_beds_used_7_day_avg",
           "inpatient_beds_used_covid_7_day_avg",
           "staffed_icu_adult_patients_confirmed_covid_7_day_avg"]
+errors = pd.DataFrame(columns=target)
 
 # Hashed so serach faster
 existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
@@ -56,22 +63,30 @@ with conn.transaction():
          adult_icu_patients_confirmed_covid) = row[target]
 
         # Data cleaning process
-        if (total_adult_hospital_beds < 0):
+        if check_numeric_na(total_adult_hospital_beds):
             total_adult_hospital_beds = None
-        if (total_pediatric_hospital_beds < 0):
+        if check_numeric_na(total_pediatric_hospital_beds):
             total_pediatric_hospital_beds = None
-        if (total_adult_hospital_beds_occupied < 0):
+        if check_numeric_na(total_adult_hospital_beds_occupied):
             total_adult_hospital_beds_occupied = None
-        if (total_pediatric_hospital_beds_occupied < 0):
+        if check_numeric_na(total_pediatric_hospital_beds_occupied):
             total_pediatric_hospital_beds_occupied = None
-        if (total_icu_beds < 0):
+        if check_numeric_na(total_icu_beds):
             total_icu_beds = None
-        if (total_icu_beds_occupied < 0):
+        if check_numeric_na(total_icu_beds_occupied < 0):
             total_icu_beds_occupied = None
-        if (inpatient_beds_occupied_covid < 0):
+        if check_numeric_na(inpatient_beds_occupied_covid):
             inpatient_beds_occupied_covid = None
-        if (adult_icu_patients_confirmed_covid < 0):
+        if check_numeric_na(adult_icu_patients_confirmed_covid):
             adult_icu_patients_confirmed_covid = None
+
+        # For geocoded information
+        if (geocoded_hospital_address is None):
+            lat = None
+            lon = None
+        else:
+            lat = float(geocoded_hospital_address.split(" ")[1][1:])
+            lon = float(geocoded_hospital_address.split(" ")[2][:-1])
 
         # If the hospital is new
         if (hospital_pk not in existing_ids):
@@ -82,20 +97,19 @@ with conn.transaction():
                     # Only insert when not in table
                     cur.execute("INSERT INTO facility_information ("
                                 "facility_id, facility_name, "
-                                "geocoded_hospital_address, "
-                                "address, city, state, zipcode, "
+                                "lat, lon, address, city, state, zipcode, "
                                 "fipscode"
                                 ") VALUES ("
                                 "%(facility_id)s, %(facility_name)s, "
-                                "%(geocoded_hospital_address)s, "
+                                "%(lat)s, %(lon)s, "
                                 "%(address)s, %(city)s, %(state)s, "
                                 "%(zipcode)s, %(fipscode)s"
                                 ");",
                                 {
                                     "facility_id": hospital_pk,
                                     "facility_name": hospital_name,
-                                    "geocoded_hospital_address":
-                                    geocoded_hospital_address,
+                                    "lat": lat,
+                                    "lon": lon,
                                     "address": address,
                                     "city": city,
                                     "state": state,
@@ -106,7 +120,7 @@ with conn.transaction():
             except Exception as e:
                 print("Insertion into facility_information failed at row " +
                       str(index) + ":", e)
-                data.iloc[index].to_csv("error_row.csv")
+                errors.append(row[target])
             else:
                 num_info_inserted += 1
 
@@ -117,13 +131,13 @@ with conn.transaction():
                 # Make a new SAVEPOINT
                 with conn.transaction():
                     cur.execute("UPDATE facility_information "
-                                "SET geocoded_hospital_address = "
-                                "%(geocoded_hospital_address)s, "
+                                "SET lat = %(lat)s, "
+                                "lon = %(lon)s, "
                                 "fipscode = %(fipscode)s "
                                 "WHERE facility_id = %(facility_id)s;",
                                 {
-                                    "geocoded_hospital_address":
-                                    geocoded_hospital_address,
+                                    "lat": lat,
+                                    "lon": lon,
                                     "fipscode": fipscode,
                                     "facility_id": hospital_pk
                                 })
@@ -132,7 +146,7 @@ with conn.transaction():
             except Exception as e:
                 print("Updating facility_information failed at row " +
                       str(index) + ":", e)
-                data.iloc[index].to_csv("error_row.csv")
+                errors.append(row[target])
 
             else:
                 num_info_updated += 1
@@ -181,13 +195,14 @@ with conn.transaction():
         except Exception as e:
             print("Insertion into quality_reports failed at row " +
                   str(index) + ":", e)
-            data.iloc[index].to_csv("error_row.csv")
+            errors.append(row[target])
         else:
             # No exception happened, so we continue
             num_report_inserted += 1
 
 # now we commit the entire transaction
 conn.commit()
+errors.to_csv("error_rows.csv")
 print("Number of rows inserted into facility_information:", num_info_inserted)
 print("Number of rows updated in facility_information:", num_info_updated)
 print("Number of rows inserted into quality_reports:", num_report_inserted)
