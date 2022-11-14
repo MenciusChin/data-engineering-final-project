@@ -27,7 +27,7 @@ target = ["collection_week","hospital_pk", "hospital_name",
           "all_pediatric_inpatient_bed_occupied_7_day_avg", 
           "total_icu_beds_7_day_avg", "icu_beds_used_7_day_avg", 
           "inpatient_beds_used_covid_7_day_avg", 
-          "staffed_adult_icu_patients_confirmed_covid_7_day_avg"]
+          "staffed_icu_adult_patients_confirmed_covid_7_day_avg"]
 
 # Start transaction
 with conn.transaction():
