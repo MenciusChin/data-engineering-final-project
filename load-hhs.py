@@ -41,68 +41,77 @@ with conn.transaction():
          total_pediatric_hospital_beds_occupied, total_icu_beds,
          total_icu_beds_occupied, inpatient_beds_occupied_covid,
          adult_icu_patients_confirmed_covid) = row[target]
-
+        
+        # Delete the invalid data row
+        if (len(hospital_pk) > 6):
+            print("Insertion into facility_reports failed at row " +
+                  str(index) + ":", "The hospital_pk is invalid")
+            continue
+        
         # Convert -999 to None
-        if (total_adult_hospital_beds == "-999999"):
+        if (total_adult_hospital_beds == -999999):
             total_adult_hospital_beds = None
-        if (total_pediatric_hospital_beds == "-999999"):
+        if (total_pediatric_hospital_beds == -999999):
             total_pediatric_hospital_beds = None
-        if (total_adult_hospital_beds_occupied == "-999999"):
+        if (total_adult_hospital_beds_occupied == -999999):
             total_adult_hospital_beds_occupied = None
-        if (total_pediatric_hospital_beds_occupied == "-999999"):
+        if (total_pediatric_hospital_beds_occupied == -999999):
             total_pediatric_hospital_beds_occupied = None
-        if (total_icu_beds == "-999999"):
+        if (total_icu_beds == -999999):
             total_icu_beds = None
-        if (total_icu_beds_occupied == "-999999"):
+        if (total_icu_beds_occupied == -999999):
             total_icu_beds_occupied = None
-        if (inpatient_beds_occupied_covid == "-999999"):
+        if (inpatient_beds_occupied_covid == -999999):
             inpatient_beds_occupied_covid = None 
-        if (adult_icu_patients_confirmed_covid == "-999999"):
+        if (adult_icu_patients_confirmed_covid == -999999):
             adult_icu_patients_confirmed_covid = None 
+
 
         # Insert into facility_reports
         try:
-            cur.execute("INSERT INTO facility_reports ("
-                        "report_date", "hospital_pk", "hospital_name", 
-                        "total_adult_hospital_beds",
-                        "total_pediatric_hospital_beds", 
-                        "total_adult_hospital_beds_occupied",
-                        "total_pediatric_hospital_beds_occupied", 
-                        "total_icu_beds","total_icu_beds_occupied", 
-                        "inpatient_beds_occupied_covid",
-                        "adult_icu_patients_confirmed_covid"
-                        ") VALUES ("
-                        "TO_DATE(%(report_date)s, 'YYYY-MM-DD'), "
-                        "%(hospital_pk)s, %(hospital_name)s, "
-                        "%(total_adult_hospital_beds)s, "
-                        "%(total_pediatric_hospital_beds)s, "
-                        "%(total_adult_hospital_beds_occupied)s, "
-                        "%(total_pediatric_hospital_beds_occupied)s, "
-                        "%(total_icu_beds)s, "
-                        "%(total_icu_beds_occupied)s"
-                        "%(inpatient_beds_occupied_covid)s"
-                        "%(adult_icu_patients_confirmed_covid)s"
-                        ");",
-                        {
-                            "report_date": report_date,
-                            "hospital_pk": hospital_pk,
-                            "hospital_name": hospital_name,
-                            "total_adult_hospital_beds": 
-                                total_adult_hospital_beds,
-                            "total_pediatric_hospital_beds": 
-                                total_pediatric_hospital_beds,
-                            "total_adult_hospital_beds_occupied": 
-                                total_adult_hospital_beds_occupied,
-                            "total_pediatric_hospital_beds_occupied": 
-                                total_pediatric_hospital_beds_occupied,
-                            "total_icu_beds": total_icu_beds,
-                            "total_icu_beds_occupied": 
-                                total_icu_beds_occupied,
-                            "inpatient_beds_occupied_covid": 
-                                inpatient_beds_occupied_covid,
-                            "adult_icu_patients_confirmed_covid": 
-                                adult_icu_patients_confirmed_covid                                       
-                        })
+            # Make a new SAVEPOINT
+            with conn.transaction():
+                cur.execute("INSERT INTO facility_reports ("
+                            "report_date, hospital_pk, hospital_name, "
+                            "total_adult_hospital_beds, "
+                            "total_pediatric_hospital_beds, " 
+                            "total_adult_hospital_beds_occupied, "
+                            "total_pediatric_hospital_beds_occupied, "
+                            "total_icu_beds, total_icu_beds_occupied, "
+                            "inpatient_beds_occupied_covid, "
+                            "adult_icu_patients_confirmed_covid"
+                            ") VALUES ("
+                            "TO_DATE(%(report_date)s, 'YYYY-MM-DD'), "
+                            "%(hospital_pk)s, %(hospital_name)s, "
+                            "%(total_adult_hospital_beds)s, "
+                            "%(total_pediatric_hospital_beds)s, "
+                            "%(total_adult_hospital_beds_occupied)s, "
+                            "%(total_pediatric_hospital_beds_occupied)s, "
+                            "%(total_icu_beds)s, "
+                            "%(total_icu_beds_occupied)s, "
+                            "%(inpatient_beds_occupied_covid)s, "
+                            "%(adult_icu_patients_confirmed_covid)s"
+                            ");",
+                            {
+                                "report_date": report_date,
+                                "hospital_pk": hospital_pk,
+                                "hospital_name": hospital_name,
+                                "total_adult_hospital_beds": 
+                                    total_adult_hospital_beds,
+                                "total_pediatric_hospital_beds": 
+                                    total_pediatric_hospital_beds,
+                                "total_adult_hospital_beds_occupied": 
+                                    total_adult_hospital_beds_occupied,
+                                "total_pediatric_hospital_beds_occupied": 
+                                    total_pediatric_hospital_beds_occupied,
+                                "total_icu_beds": total_icu_beds,
+                                "total_icu_beds_occupied": 
+                                    total_icu_beds_occupied,
+                                "inpatient_beds_occupied_covid": 
+                                    inpatient_beds_occupied_covid,
+                                "adult_icu_patients_confirmed_covid": 
+                                    adult_icu_patients_confirmed_covid                                       
+                            })
         # If exception caught (any), rollback
         except Exception as e:
             print("Insertion into facility_reports failed at row " +
