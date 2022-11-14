@@ -7,9 +7,10 @@ import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
 
+
 # Connect to DB
 conn = psycopg.connect(
-    host='sculptor.stat.cmu.edu', dbname=DB_USER,
+    host="sculptor.stat.cmu.edu", dbname=DB_USER,
     user=DB_USER, password=DB_PASSWORD
 )
 cur = conn.cursor()

@@ -37,18 +37,18 @@ CREATE TABLE facility_information (
 /* We assume there will be many quality ratings for one hospital, 
    And we would like to keeo track of the ratings. */
 CREATE TABLE quality_ratings (
-    rating_id SERIAL PRIMARY KEY,
     rating_date DATE NOT NULL CHECK (rating_date <= NOW()),
     -- We stored the different ratings in this column
     rating TEXT,
     -- So we references to the facility_information table here
-    facility_id TEXT REFERENCES facility_information(facility_id)
+    facility_id TEXT REFERENCES facility_information(facility_id),
+    -- Use the combination of date and id as pk
+    PRIMARY KEY (rating_date, facility_id)
 );
 
 /* We assume there will be many reports for one hospital, 
    And we would like to keeo track of the reports. */
 CREATE TABLE facility_reports (
-    report_id SERIAL PRIMARY KEY,
     report_date DATE CHECK (report_date <= NOW()),
     hospital_pk TEXT REFERENCES facility_information(facility_id),
     -- The total number of hospital beds available each week, 
@@ -68,5 +68,7 @@ CREATE TABLE facility_reports (
         CHECK (inpatient_beds_occupied_covid >= 0),
     -- The number of adult ICU patients who have confirmed COVID
     adult_icu_patients_confirmed_covid NUMERIC 
-        CHECK (adult_icu_patients_confirmed_covid >= 0)
+        CHECK (adult_icu_patients_confirmed_covid >= 0),
+    -- Use the combination of date and id as pk
+    PRIMARY KEY (report_date, hospital_pk)
 );

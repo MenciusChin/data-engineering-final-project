@@ -15,7 +15,7 @@ def check_numeric_na(var):
 
 # Connect to DB
 conn = psycopg.connect(
-    host='sculptor.stat.cmu.edu', dbname=DB_USER,
+    host="sculptor.stat.cmu.edu", dbname=DB_USER,
     user=DB_USER, password=DB_PASSWORD
 )
 cur = conn.cursor()
@@ -85,6 +85,7 @@ with conn.transaction():
             lat = None
             lon = None
         else:
+            print(geocoded_hospital_address.type())
             lat = float(geocoded_hospital_address.split(" ")[1][1:])
             lon = float(geocoded_hospital_address.split(" ")[2][:-1])
 
