@@ -22,7 +22,8 @@ CREATE TABLE facility_information (
     facility_type TEXT,
     emergency_service TEXT,
     -- We include all geographic information in the table avoid excessive JOINs
-    geocoded_hospital_address TEXT,
+    lat NUMERIC,
+    lon NUMERIC,
     address TEXT, 
     city TEXT,
     state CHAR(2),
