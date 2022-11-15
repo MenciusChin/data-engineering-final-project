@@ -7,7 +7,7 @@ Includes three table:
 	2. quality_ratings (quality ratings for each hospital from the Centers for Medicare and Medicaid Services, update yearly)
 	3. facility_reports (each hospital's facility information, update weekly)
 
-**Load-hhs.py**
+**Load_hhs.py**
 This Python code will load HHS data each week and CMS quality data as needed. It helps to handle conversions, cleaning, and reformatting of the data, and insert data into one of three tables.
 
 As the person who upload the dataset, you are required to have valid user ID and password.
@@ -22,3 +22,6 @@ If there's any error happened during the time insert dataset, it will print mess
 If a row is invalid and rejected by Postgres, Python write that row out to a separate CSV file. 
 
 If the dataset updated successfully, Python will report the uumber of rows inserted into facility_information and quality_reports, also the number of rows updated in facility_information
+
+**Load_quality.py**
+Similar to load_hhs, update hospital's rating related information to quality_ratings table.
