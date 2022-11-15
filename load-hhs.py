@@ -1,7 +1,6 @@
 """Module for loading HHS data into DB"""
 
 import sys
-
 import pandas as pd
 import psycopg
 
@@ -10,6 +9,7 @@ from credentials import DB_PASSWORD, DB_USER
 
 # Helper function for checking numeric NA values
 def check_numeric_na(var):
+    """Check if the input variable is negative value or NaN"""
     return True if (var is None or var < 0) else False
 
 
@@ -28,6 +28,8 @@ data = pd.read_csv('data/hhs/' + sys.argv[1])
 cur.execute("SELECT facility_id FROM facility_information")
 facility_ids = pd.DataFrame(cur.fetchall())
 conn.commit()        # Commit here for the SELECT clause
+# Hashed so serach faster
+existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
 
 # Target variables
 target = ["hospital_pk", "collection_week", "state",
@@ -41,9 +43,6 @@ target = ["hospital_pk", "collection_week", "state",
           "inpatient_beds_used_covid_7_day_avg",
           "staffed_icu_adult_patients_confirmed_covid_7_day_avg"]
 errors = pd.DataFrame(columns=target)
-
-# Hashed so serach faster
-existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
 
 with conn.transaction():
     # Create counting variables

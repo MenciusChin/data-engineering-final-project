@@ -23,15 +23,14 @@ data = pd.read_csv('data/quality/' + sys.argv[2])
 cur.execute("SELECT facility_id FROM facility_information")
 facility_ids = pd.DataFrame(cur.fetchall())
 conn.commit()        # Commit here for the SELECT clause
+# Hashed so serach faster
+existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
 
 # Target variables
 target = ["Facility ID", "Facility Name", "Hospital Type",
           "Emergency Services", "Address", "City", "State",
           "ZIP Code", "County Name", "Hospital overall rating"]
 errors = pd.DataFrame(columns=target)
-
-# Hashed so serach faster
-existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
 
 # Start transaction
 with conn.transaction():
