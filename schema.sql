@@ -39,7 +39,7 @@ CREATE TABLE facility_information (
 CREATE TABLE quality_ratings (
     rating_date DATE NOT NULL CHECK (rating_date <= NOW()),
     -- We stored the different ratings in this column
-    rating TEXT,
+    rating NUMERIC,
     -- So we references to the facility_information table here
     facility_id TEXT REFERENCES facility_information(facility_id),
     -- Use the combination of date and id as pk
