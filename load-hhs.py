@@ -5,12 +5,7 @@ import pandas as pd
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-
-
-# Helper function for checking numeric NA values
-def check_numeric_na(var):
-    """Check if the input variable is negative value or NaN"""
-    return True if (var is None or var < 0) else False
+from loadinghelper import check_numeric_na, check_geo
 
 
 # Connect to DB
@@ -34,15 +29,19 @@ existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
 # Target variables
 target = ["hospital_pk", "collection_week", "state",
           "hospital_name", "address", "city", "zip",
-          "fips_code", "geocoded_hospital_address",
-          "all_adult_hospital_beds_7_day_avg",
-          "all_pediatric_inpatient_beds_7_day_avg",
-          "all_adult_hospital_inpatient_bed_occupied_7_day_avg",
-          "all_pediatric_inpatient_bed_occupied_7_day_avg",
-          "total_icu_beds_7_day_avg", "icu_beds_used_7_day_avg",
-          "inpatient_beds_used_covid_7_day_avg",
-          "staffed_icu_adult_patients_confirmed_covid_7_day_avg"]
+          "fips_code", "geocoded_hospital_address"]
+numeric = ["all_adult_hospital_beds_7_day_avg",
+           "all_pediatric_inpatient_beds_7_day_avg",
+           "all_adult_hospital_inpatient_bed_occupied_7_day_avg",
+           "all_pediatric_inpatient_bed_occupied_7_day_avg",
+           "total_icu_beds_7_day_avg", "icu_beds_used_7_day_avg",
+           "inpatient_beds_used_covid_7_day_avg",
+           "staffed_icu_adult_patients_confirmed_covid_7_day_avg"]
 errors = pd.DataFrame(columns=target)
+
+# Data cleaning process
+for col in numeric:
+    data[col] = data[col].apply(check_numeric_na)
 
 with conn.transaction():
     # Create counting variables
@@ -59,33 +58,10 @@ with conn.transaction():
          total_pediatric_hospital_beds_occupied,
          total_icu_beds, total_icu_beds_occupied,
          inpatient_beds_occupied_covid,
-         adult_icu_patients_confirmed_covid) = row[target]
-
-        # Data cleaning process
-        if check_numeric_na(total_adult_hospital_beds):
-            total_adult_hospital_beds = None
-        if check_numeric_na(total_pediatric_hospital_beds):
-            total_pediatric_hospital_beds = None
-        if check_numeric_na(total_adult_hospital_beds_occupied):
-            total_adult_hospital_beds_occupied = None
-        if check_numeric_na(total_pediatric_hospital_beds_occupied):
-            total_pediatric_hospital_beds_occupied = None
-        if check_numeric_na(total_icu_beds):
-            total_icu_beds = None
-        if check_numeric_na(total_icu_beds_occupied):
-            total_icu_beds_occupied = None
-        if check_numeric_na(inpatient_beds_occupied_covid):
-            inpatient_beds_occupied_covid = None
-        if check_numeric_na(adult_icu_patients_confirmed_covid):
-            adult_icu_patients_confirmed_covid = None
+         adult_icu_patients_confirmed_covid) = row[target + numeric]
 
         # For geocoded information
-        if (pd.isna(geocoded_hospital_address)):
-            lat = None
-            lon = None
-        else:
-            lat = float(geocoded_hospital_address.split(" ")[1][1:])
-            lon = float(geocoded_hospital_address.split(" ")[2][:-1])
+        lat, lon = check_geo(geocoded_hospital_address)
 
         # If the hospital is new
         if (hospital_pk not in existing_ids):
