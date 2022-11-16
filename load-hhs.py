@@ -175,8 +175,10 @@ with conn.transaction():
             # No exception happened, so we continue
             num_report_inserted += 1
 
-# now we commit the entire transaction
+# now we commit and close the entire transaction
 conn.commit()
+conn.close()
+
 errors.to_csv("error_rows.csv")
 print("Number of rows inserted into facility_information:", num_info_inserted)
 print("Number of rows updated in facility_information:", num_info_updated)
