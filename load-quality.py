@@ -2,6 +2,7 @@
 
 import sys
 
+import numpy as np
 import pandas as pd
 import psycopg
 from credentials import DB_PASSWORD, DB_USER
@@ -29,6 +30,9 @@ errors = pd.DataFrame(columns=target)
 # Change rating to None if Not Avaliable
 data["Hospital overall rating"] = data["Hospital overall rating"].\
     apply(check_rating)
+
+# Change all NaN to None
+data[target].replace(np.NaN, None, inplace=True)
 
 # Start transaction
 with conn.transaction():

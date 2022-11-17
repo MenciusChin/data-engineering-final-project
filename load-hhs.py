@@ -3,6 +3,7 @@
 import sys
 import pandas as pd
 import psycopg
+import numpy as np
 
 from credentials import DB_PASSWORD, DB_USER
 from loadinghelper import check_numeric_na, check_geo, get_existing_ids
@@ -37,6 +38,9 @@ errors = pd.DataFrame(columns=target)
 # Data cleaning process
 for col in numeric:
     data[col] = data[col].apply(check_numeric_na)
+
+# Change all NaN to None
+data[target+numeric].replace(np.NaN, None, inplace=True)
 
 with conn.transaction():
     # Create counting variables
