@@ -5,6 +5,7 @@ import sys
 import pandas as pd
 import psycopg
 from credentials import DB_PASSWORD, DB_USER
+from loadinghelper import get_existing_ids, check_rating
 
 
 # Connect to DB
@@ -17,19 +18,17 @@ cur = conn.cursor()
 # Load data from terminal input
 data = pd.read_csv('data/quality/' + sys.argv[2])
 
-# Get existing hospitals/facilities id
-# Seem that pd.read_sql doesn't work
-cur.execute("SELECT facility_id FROM facility_information")
-facility_ids = pd.DataFrame(cur.fetchall())
-conn.commit()        # Commit here for the SELECT clause
-# Hashed so serach faster
-existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
+existing_ids = get_existing_ids(cur, conn)
 
 # Target variables
 target = ["Facility ID", "Facility Name", "Hospital Type",
           "Emergency Services", "Address", "City", "State",
           "ZIP Code", "County Name", "Hospital overall rating"]
 errors = pd.DataFrame(columns=target)
+
+# Change rating to None if Not Avaliable
+data["Hospital overall rating"] = data["Hospital overall rating"].\
+    apply(check_rating)
 
 # Start transaction
 with conn.transaction():
@@ -42,10 +41,6 @@ with conn.transaction():
         # First extract our target variables
         (facility_id, facility_name, facility_type, emergency_service,
          address, city, state, zipcode, county, rating) = row[target]
-
-        # Change rating to None if Not Avaliable
-        if (rating == "Not Available"):
-            rating = None
 
         # If the hospital is new
         if (facility_id not in existing_ids):
@@ -79,7 +74,10 @@ with conn.transaction():
             except Exception as e:
                 print("Insertion into facility_information failed at row " +
                       str(index) + ":", e)
-                errors.append(row[target])
+                errors = pd.concat(
+                    [errors, pd.DataFrame(row[target]).transpose()],
+                    ignore_index=True
+                    )
             else:
                 num_info_inserted += 1
 
@@ -105,7 +103,10 @@ with conn.transaction():
             except Exception as e:
                 print("Updating facility_information failed at row " +
                       str(index) + ":", e)
-                errors.append(row[target])
+                errors = pd.concat(
+                    [errors, pd.DataFrame(row[target]).transpose()],
+                    ignore_index=True
+                    )
 
             else:
                 num_info_updated += 1
@@ -125,7 +126,9 @@ with conn.transaction():
         except Exception as e:
             print("Insertion into quality_ratings failed at row " +
                   str(index) + ":", e)
-            errors.append(row[target])
+            errors = pd.concat([errors, pd.DataFrame(row[target]).transpose()],
+                               ignore_index=True)
+
         else:
             # No exception happened, so we continue
             num_quality_inserted += 1

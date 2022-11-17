@@ -5,7 +5,7 @@ import pandas as pd
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-from loadinghelper import check_numeric_na, check_geo
+from loadinghelper import check_numeric_na, check_geo, get_existing_ids
 
 
 # Connect to DB
@@ -19,12 +19,7 @@ cur = conn.cursor()
 data = pd.read_csv('data/hhs/' + sys.argv[1])
 
 # Get existing hospitals/facilities id
-# Seem that pd.read_sql doesn't work
-cur.execute("SELECT facility_id FROM facility_information")
-facility_ids = pd.DataFrame(cur.fetchall())
-conn.commit()        # Commit here for the SELECT clause
-# Hashed so serach faster
-existing_ids = set(facility_ids[0]) if len(facility_ids) > 0 else {}
+existing_ids = get_existing_ids(cur, conn)
 
 # Target variables
 target = ["hospital_pk", "collection_week", "state",
@@ -95,7 +90,10 @@ with conn.transaction():
             except Exception as e:
                 print("Insertion into facility_information failed at row " +
                       str(index) + ":", e)
-                errors.append(row[target])
+                errors = pd.concat(
+                    [errors, pd.DataFrame(row[target]).transpose()],
+                    ignore_index=True
+                    )
             else:
                 num_info_inserted += 1
 
@@ -121,7 +119,10 @@ with conn.transaction():
             except Exception as e:
                 print("Updating facility_information failed at row " +
                       str(index) + ":", e)
-                errors.append(row[target])
+                errors = pd.concat(
+                    [errors, pd.DataFrame(row[target]).transpose()],
+                    ignore_index=True
+                    )
 
             else:
                 num_info_updated += 1
@@ -170,7 +171,8 @@ with conn.transaction():
         except Exception as e:
             print("Insertion into quality_reports failed at row " +
                   str(index) + ":", e)
-            errors.append(row[target])
+            errors = pd.concat([errors, pd.DataFrame(row[target]).transpose()],
+                               ignore_index=True)
         else:
             # No exception happened, so we continue
             num_report_inserted += 1
