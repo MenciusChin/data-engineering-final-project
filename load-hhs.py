@@ -3,7 +3,6 @@
 import sys
 import pandas as pd
 import psycopg
-import numpy as np
 
 from credentials import DB_PASSWORD, DB_USER
 from loadinghelper import check_numeric_na, check_geo, get_existing_ids
