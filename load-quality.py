@@ -1,10 +1,9 @@
 """Module for loading reports data into DB"""
 
 import sys
-
-import numpy as np
 import pandas as pd
 import psycopg
+
 from credentials import DB_PASSWORD, DB_USER
 from loadinghelper import get_existing_ids, check_rating
 
