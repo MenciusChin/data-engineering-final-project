@@ -39,9 +39,6 @@ errors = pd.DataFrame(columns=target)
 for col in numeric:
     data[col] = data[col].apply(check_numeric_na)
 
-# Change all NaN to None
-data[target+numeric].replace(np.NaN, None, inplace=True)
-
 with conn.transaction():
     # Create counting variables
     num_info_inserted = 0

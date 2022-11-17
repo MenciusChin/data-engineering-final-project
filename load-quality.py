@@ -31,9 +31,6 @@ errors = pd.DataFrame(columns=target)
 data["Hospital overall rating"] = data["Hospital overall rating"].\
     apply(check_rating)
 
-# Change all NaN to None
-data[target].replace(np.NaN, None, inplace=True)
-
 # Start transaction
 with conn.transaction():
     # Create counting variables
