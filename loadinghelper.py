@@ -10,6 +10,7 @@ def check_numeric_na(var):
 
 
 def check_geo(var):
+    """Return either None, None or the latitude, longitude"""
     if pd.isna(var):
         return None, None
     else:
@@ -17,10 +18,18 @@ def check_geo(var):
 
 
 def check_rating(var):
+    """Return None if the rating is Not Available"""
     return None if var == "Not Available" else var
 
 
 def get_existing_ids(cur, conn):
+    """
+    Return a set of existings hospitals in our database
+
+    Psycopg objects:
+    cur -- cursor object
+    conn -- connection object
+    """
     # Get existing hospitals/facilities id
     # Seem that pd.read_sql doesn't work
     cur.execute("SELECT facility_id FROM facility_information")
