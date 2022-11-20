@@ -23,7 +23,7 @@ If the dataset updated successfully, Python will report the number of rows inser
 *load_quality.py* Similar to load_hhs, update and insert new hospital's rating related information to facility_information table and quality_ratings table.
 
 *loadinghelper.py* This file will help data loading, it includes four functions:
-1. Check the negtive input variable
+1. Check the negative input variable
 2. Split the geocoded hospital address
 3. Processing of null input variable
 4. Get the existing hospital ids for future processing
