@@ -6,7 +6,7 @@ In this project, our team SWAN develop a data pipeline for ingesting data from t
 2. quality_ratings (quality ratings for each hospital from the Centers for Medicare and Medicaid Services, update yearly or every half-year) 
 3. facility_reports (each hospital's facility information, update weekly)
 
-*load_hhs.py* This file will load HHS data each week and CMS quality data as needed. It helps to handle conversions, cleaning, and reformatting of the data, and inserting data into one of three tables. The code example for using load_hhs.py is below:
+*load_hhs.py* This file will load HHS data each week and CMS quality data as needed. It helps to handle conversions, cleaning, and reformatting of the data, then inserting and updating data into two of three tables. The code example for using load_hhs.py is below:
 
  - python load-hhs.py 2022-01-04-hhs-data.csv
 
@@ -20,4 +20,10 @@ If the dataset updated successfully, Python will report the number of rows inser
 
 - Number of rows inserted into and updated in facility information = Number of rows inserted into facility_reports
 
-*load_quality.py* Similar to load_hhs, update and insert new hospital's rating related information to quality_ratings table.
+*load_quality.py* Similar to load_hhs, update and insert new hospital's rating related information to facility_information table and quality_ratings table.
+
+*loadinghelper.py* This file will help data loading, it includes four functions:
+1. Check the negative input variable
+2. Split the geocoded hospital address
+3. Process the null input variable
+4. Get the existing hospital ids for future processing
