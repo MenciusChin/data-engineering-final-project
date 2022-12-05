@@ -6,7 +6,7 @@ import pandas as pd
 # Helper function for checking numeric NA values
 def check_numeric_na(var):
     """Check if the input variable is negative value or NaN"""
-    return None if var < 0 else var
+    return None if var < 0 or pd.isna(var) else var
 
 
 def check_geo(var):
