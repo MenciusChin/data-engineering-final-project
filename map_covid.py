@@ -1,9 +1,11 @@
+"""Module for COVID map"""
+
 import plotly.graph_objects as go 
 import pandas as pd 
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-
+from helper import change_na
 
 
 # Connect to DB
@@ -17,13 +19,9 @@ cur = conn.cursor()
 # Make a new SAVEPOINT
 with conn.transaction():
     # Update the NaN in the dataset with NULL
-    cur.execute("UPDATE facility_reports "
-                "SET adult_icu_patients_confirmed_covid = NULL "
-                "WHERE adult_icu_patients_confirmed_covid = 'NaN'; ")
-    
-    cur.execute("UPDATE facility_reports "
-                "SET inpatient_beds_occupied_covid = NULL "
-                "WHERE inpatient_beds_occupied_covid = 'NaN'; ")
+    change_na(cur, conn, "facility_reports", \
+              "adult_icu_patients_confirmed_covid")
+    change_na(cur, conn, "facility_reports", "inpatient_beds_occupied_covid")
     
     # Get the data for COVID map in each state
     cur.execute("SELECT state, SUM(total_covid_0) AS total_covid FROM "
