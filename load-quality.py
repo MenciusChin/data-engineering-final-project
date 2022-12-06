@@ -39,6 +39,7 @@ with conn.transaction():
     num_quality_inserted = 0
 
     for index, row in data.iterrows():
+        print(index)
         # First extract our target variables
         (facility_id, facility_name, facility_type, ownership,
          emergency_service, address, city, state, zipcode, county,
@@ -114,8 +115,8 @@ with conn.transaction():
                             "ownership, emergency_service, facility_id"
                             ") VALUES ("
                             "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
-                            "%(rating)s, %(facility_id)s"
-                            ");",
+                            "%(rating)s, %(facility_type)s, %(ownership)s, "
+                            "%(emergency_service)s, %(facility_id)s);",
                             {"rating_date": sys.argv[1],
                              "rating": rating,
                              "facility_type": facility_type,
