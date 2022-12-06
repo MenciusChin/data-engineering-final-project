@@ -1,12 +1,13 @@
 """Helper module for loading-data"""
 
+
 import pandas as pd
 
 
 # Helper function for checking numeric NA values
 def check_numeric_na(var):
     """Check if the input variable is negative value or NaN"""
-    return None if var < 0 or pd.isna(var) else var
+    var = None if pd.isna(var) or var < 0 else var
 
 
 def check_geo(var):
@@ -19,7 +20,7 @@ def check_geo(var):
 
 def check_rating(var):
     """Return None if the rating is Not Available"""
-    return None if var == "Not Available" else var
+    var = None if var == "Not Available" else var
 
 
 def get_existing_ids(cur, conn):

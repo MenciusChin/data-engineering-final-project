@@ -38,6 +38,8 @@ errors = pd.DataFrame(columns=target)
 for col in numeric:
     data[col] = data[col].apply(check_numeric_na)
 
+print(data["all_adult_hospital_beds_7_day_avg"])
+
 with conn.transaction():
     # Create counting variables
     num_info_inserted = 0
@@ -54,6 +56,8 @@ with conn.transaction():
          total_icu_beds, total_icu_beds_occupied,
          inpatient_beds_occupied_covid,
          adult_icu_patients_confirmed_covid) = row[target + numeric]
+
+        print(total_adult_hospital_beds)
 
         # For geocoded information
         lat, lon = check_geo(geocoded_hospital_address)
