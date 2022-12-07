@@ -1,1 +1,1 @@
-,Facility ID,Facility Name,Hospital Type,Hospital Ownership,Emergency Services,Address,City,State,ZIP Code,County Name,Hospital overall rating
+,hospital_pk,collection_week,state,hospital_name,address,city,zip,fips_code,geocoded_hospital_address

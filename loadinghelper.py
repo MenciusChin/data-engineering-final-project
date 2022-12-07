@@ -4,23 +4,12 @@
 import pandas as pd
 
 
-# Helper function for checking numeric NA values
-def check_numeric_na(var):
-    """Check if the input variable is negative value or NaN"""
-    var = None if pd.isna(var) or var < 0 else var
-
-
 def check_geo(var):
     """Return either None, None or the latitude, longitude"""
     if pd.isna(var):
         return None, None
     else:
         return float(var.split(" ")[1][1:]), float(var.split(" ")[2][:-1])
-
-
-def check_rating(var):
-    """Return None if the rating is Not Available"""
-    var = None if var == "Not Available" else var
 
 
 def get_existing_ids(cur, conn):

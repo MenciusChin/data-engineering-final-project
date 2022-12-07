@@ -1,11 +1,12 @@
 """Module for loading reports data into DB"""
 
 import sys
+import numpy as np
 import pandas as pd
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-from loadinghelper import get_existing_ids, check_rating
+from loadinghelper import get_existing_ids
 
 
 # Connect to DB
@@ -28,8 +29,9 @@ target = ["Facility ID", "Facility Name", "Hospital Type",
 errors = pd.DataFrame(columns=target)
 
 # Change rating to None if Not Avaliable
-data["Hospital overall rating"] = data["Hospital overall rating"].\
-    apply(check_rating)
+data["Hospital overall rating"] = np.where(data["Hospital overall rating"] ==
+                                           "Not Available", None,
+                                           data["Hospital overall rating"])
 
 # Start transaction
 with conn.transaction():
@@ -39,7 +41,6 @@ with conn.transaction():
     num_quality_inserted = 0
 
     for index, row in data.iterrows():
-        print(index)
         # First extract our target variables
         (facility_id, facility_name, facility_type, ownership,
          emergency_service, address, city, state, zipcode, county,
