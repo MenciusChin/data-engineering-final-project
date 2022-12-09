@@ -1,11 +1,12 @@
 """Module for loading HHS data into DB"""
 
 import sys
+import numpy as np
 import pandas as pd
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-from loadinghelper import check_numeric_na, check_geo, get_existing_ids
+from loadinghelper import check_geo, get_existing_ids
 
 
 # Connect to DB
@@ -36,7 +37,8 @@ errors = pd.DataFrame(columns=target)
 
 # Data cleaning process
 for col in numeric:
-    data[col] = data[col].apply(check_numeric_na)
+    data[col] = np.where(data[col].isna(), None, data[col])
+    data[col] = np.where(data[col] < 0, None, data[col])
 
 with conn.transaction():
     # Create counting variables

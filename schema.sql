@@ -19,8 +19,6 @@ It was not redundant since:
 CREATE TABLE facility_information (
     facility_id TEXT PRIMARY KEY,
     facility_name TEXT NOT NULL,
-    facility_type TEXT,
-    emergency_service TEXT,
     -- We include all geographic information in the table avoid excessive JOINs
     lat NUMERIC,
     lon NUMERIC,
@@ -42,6 +40,10 @@ CREATE TABLE quality_ratings (
     rating NUMERIC,
     -- So we references to the facility_information table here
     facility_id TEXT REFERENCES facility_information(facility_id),
+    -- Those three columns might change in future, so we kept them to be tracked
+    facility_type TEXT,
+    ownership TEXT,
+    emergency_service TEXT,
     -- Use the combination of date and id as pk
     PRIMARY KEY (rating_date, facility_id)
 );

@@ -1,11 +1,12 @@
 """Module for loading reports data into DB"""
 
 import sys
+import numpy as np
 import pandas as pd
 import psycopg
 
 from credentials import DB_PASSWORD, DB_USER
-from loadinghelper import get_existing_ids, check_rating
+from loadinghelper import get_existing_ids
 
 
 # Connect to DB
@@ -22,13 +23,15 @@ existing_ids = get_existing_ids(cur, conn)
 
 # Target variables
 target = ["Facility ID", "Facility Name", "Hospital Type",
-          "Emergency Services", "Address", "City", "State",
-          "ZIP Code", "County Name", "Hospital overall rating"]
+          "Hospital Ownership", "Emergency Services", "Address",
+          "City", "State", "ZIP Code", "County Name",
+          "Hospital overall rating"]
 errors = pd.DataFrame(columns=target)
 
 # Change rating to None if Not Avaliable
-data["Hospital overall rating"] = data["Hospital overall rating"].\
-    apply(check_rating)
+data["Hospital overall rating"] = np.where(data["Hospital overall rating"] ==
+                                           "Not Available", None,
+                                           data["Hospital overall rating"])
 
 # Start transaction
 with conn.transaction():
@@ -39,8 +42,9 @@ with conn.transaction():
 
     for index, row in data.iterrows():
         # First extract our target variables
-        (facility_id, facility_name, facility_type, emergency_service,
-         address, city, state, zipcode, county, rating) = row[target]
+        (facility_id, facility_name, facility_type, ownership,
+         emergency_service, address, city, state, zipcode, county,
+         rating) = row[target]
 
         # If the hospital is new
         if (facility_id not in existing_ids):
@@ -50,20 +54,16 @@ with conn.transaction():
                 with conn.transaction():
                     # Only insert when not in table
                     cur.execute("INSERT INTO facility_information ("
-                                "facility_id, facility_name, facility_type, "
-                                "emergency_service, address, city, "
+                                "facility_id, facility_name, address, city, "
                                 "state, zipcode, county"
                                 ") VALUES ("
                                 "%(facility_id)s, %(facility_name)s, "
-                                "%(facility_type)s, %(emergency_service)s, "
                                 "%(address)s, %(city)s, %(state)s, "
                                 "%(zipcode)s, %(county)s"
                                 ");",
                                 {
                                     "facility_id": facility_id,
                                     "facility_name": facility_name,
-                                    "facility_type": facility_type,
-                                    "emergency_service": emergency_service,
                                     "address": address,
                                     "city": city,
                                     "state": state,
@@ -88,13 +88,9 @@ with conn.transaction():
                 # Make a new SAVEPOINT
                 with conn.transaction():
                     cur.execute("UPDATE facility_information "
-                                "SET facility_type = %(facility_type)s, "
-                                "emergency_service = %(emergency_service)s, "
-                                "county = %(county)s "
+                                "SET county = %(county)s "
                                 "WHERE facility_id = %(facility_id)s;",
                                 {
-                                    "facility_type": facility_type,
-                                    "emergency_service": emergency_service,
                                     "county": county,
                                     "facility_id": facility_id
                                 })
@@ -116,13 +112,19 @@ with conn.transaction():
             # Make a new SAVEPOINT
             with conn.transaction():
                 cur.execute("INSERT INTO quality_ratings ("
-                            "rating_date, rating, facility_id"
+                            "rating_date, rating, facility_type, "
+                            "ownership, emergency_service, facility_id"
                             ") VALUES ("
                             "TO_DATE(%(rating_date)s, 'YYYY-MM-DD'), "
-                            "%(rating)s, %(facility_id)s"
-                            ");",
-                            {"rating_date": sys.argv[1], "rating": rating,
-                             "facility_id": facility_id})
+                            "%(rating)s, %(facility_type)s, %(ownership)s, "
+                            "%(emergency_service)s, %(facility_id)s);",
+                            {"rating_date": sys.argv[1],
+                             "rating": rating,
+                             "facility_type": facility_type,
+                             "ownership": ownership,
+                             "emergency_service": emergency_service,
+                             "facility_id": facility_id
+                             })
         except Exception as e:
             print("Insertion into quality_ratings failed at row " +
                   str(index) + ":", e)
